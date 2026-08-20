@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Deep Dive: Sunken Signal</title>
+  <desc id="desc">深海遗迹主题游戏封面：潜水器下潜到发光遗迹与宝藏之间，远处危险信号闪烁。</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0a2f3e"/>
+      <stop offset="0.55" stop-color="#04151e"/>
+      <stop offset="1" stop-color="#02090d"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="50%" cy="44%" r="50%">
+      <stop offset="0" stop-color="#3fc7d6" stop-opacity="0.24"/>
+      <stop offset="1" stop-color="#3fc7d6" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="beam" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#9cf5e6" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#9cf5e6" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="675" fill="url(#bg)"/>
+  <rect width="1200" height="675" fill="url(#glow)"/>
+
+  <g opacity="0.16" stroke="#63e4e8" stroke-width="2">
+    <path d="M0 126H1200"/><path d="M0 210H1200"/><path d="M0 294H1200"/>
+    <path d="M0 378H1200"/><path d="M0 462H1200"/><path d="M0 546H1200"/>
+  </g>
+
+  <g opacity="0.25" fill="#82a7b4">
+    <circle cx="124" cy="158" r="5"/><circle cx="150" cy="122" r="3"/><circle cx="176" cy="88" r="7"/>
+    <circle cx="978" cy="186" r="4"/><circle cx="1005" cy="145" r="6"/><circle cx="1032" cy="111" r="3"/>
+    <circle cx="886" cy="420" r="4"/><circle cx="912" cy="382" r="6"/>
+  </g>
+
+  <g transform="translate(600 276)">
+    <path d="M-120 40 L-315 208 L-35 92 Z" fill="url(#beam)" opacity="0.36"/>
+    <path d="M120 40 L315 208 L35 92 Z" fill="url(#beam)" opacity="0.36"/>
+    <ellipse cx="0" cy="34" rx="116" ry="54" fill="#0d3a48" stroke="#63e4e8" stroke-opacity="0.7" stroke-width="4"/>
+    <rect x="-35" y="-26" width="70" height="50" rx="22" fill="#082631" stroke="#63e4e8" stroke-opacity="0.7" stroke-width="4"/>
+    <circle cx="-48" cy="32" r="17" fill="#63e4e8" opacity="0.9" filter="url(#softGlow)"/>
+    <circle cx="48" cy="32" r="17" fill="#63e4e8" opacity="0.9" filter="url(#softGlow)"/>
+    <path d="M-116 28L-158 46L-118 60ZM116 28L158 46L118 60Z" fill="#0d3a48" stroke="#63e4e8" stroke-opacity="0.5" stroke-width="3"/>
+    <path d="M-18 84L0 120L18 84" fill="none" stroke="#82a7b4" stroke-width="5" stroke-linecap="round"/>
+  </g>
+
+  <g transform="translate(600 522)">
+    <path d="M-290 110L-246 24L-200 62L-160 8L-112 58L-55 18L-12 70L44 30L92 82L145 22L196 70L244 28L300 110Z" fill="#031016" stroke="#155063" stroke-width="4"/>
+    <path d="M-166 102V45H-118V102M-142 45V12M-224 102V68H-190V102M170 102V52H214V102M192 52V21" fill="none" stroke="#2b7889" stroke-width="6" opacity="0.75"/>
+    <circle cx="-78" cy="74" r="16" fill="#f7c96c" opacity="0.9" filter="url(#softGlow)"/>
+    <path d="M54 96L83 44L112 96Z" fill="#a97dff" opacity="0.9" filter="url(#softGlow)"/>
+  </g>
+
+  <g transform="translate(994 438)">
+    <circle r="42" fill="#ff6d7a" opacity="0.08" filter="url(#softGlow)"/>
+    <circle r="15" fill="#ff6d7a" opacity="0.9"/>
+    <path d="M0-34V-58M24-24L42-42M34 0H58M24 24L42 42" stroke="#ff6d7a" stroke-width="6" stroke-linecap="round" opacity="0.75"/>
+  </g>
+
+  <g transform="translate(72 76)">
+    <text x="0" y="0" fill="#63e4e8" font-family="Inter,Arial,sans-serif" font-size="21" font-weight="700" letter-spacing="8">PARTI ROOM</text>
+    <text x="0" y="82" fill="#e9fbff" font-family="Inter,Arial,sans-serif" font-size="74" font-weight="850" letter-spacing="5">DEEP DIVE</text>
+    <text x="3" y="132" fill="#f7c96c" font-family="Inter,Arial,sans-serif" font-size="31" font-weight="700" letter-spacing="9">SUNKEN SIGNAL</text>
+    <text x="3" y="178" fill="#82a7b4" font-family="Inter,Arial,sans-serif" font-size="20" letter-spacing="2">GO DEEPER · BANK THE TREASURE · ESCAPE THE CRASH</text>
+  </g>
+
+  <g transform="translate(74 594)" font-family="Inter,Arial,sans-serif">
+    <rect width="170" height="48" rx="24" fill="#071d27" stroke="#63e4e8" stroke-opacity="0.45"/>
+    <text x="85" y="31" text-anchor="middle" fill="#e9fbff" font-size="20" font-weight="700">3–8 PLAYERS</text>
+    <rect x="186" width="164" height="48" rx="24" fill="#071d27" stroke="#f7c96c" stroke-opacity="0.45"/>
+    <text x="268" y="31" text-anchor="middle" fill="#f7c96c" font-size="20" font-weight="700">5 DIVES</text>
+  </g>
+</svg>
