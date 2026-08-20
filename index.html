@@ -3,28 +3,61 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#071821" />
+    <meta name="theme-color" content="#02090d" />
     <title>Deep Dive: Sunken Signal</title>
     <link rel="stylesheet" href="/src/ui/style.css" />
   </head>
   <body>
+    <div class="abyss-backdrop" aria-hidden="true">
+      <div class="gradient-fog"></div>
+      <div class="light-column"></div>
+      <div class="terrain terrain-left"></div>
+      <div class="terrain terrain-right"></div>
+      <div class="ruin ruin-a"></div>
+      <div class="ruin ruin-b"></div>
+      <div id="bubble-field" class="bubble-field"></div>
+      <div class="scan-grid"></div>
+    </div>
+
     <div id="app" class="game-shell">
       <header class="topbar">
-        <div>
-          <p class="eyebrow">PARTI ORIGINAL</p>
-          <h1>DEEP DIVE</h1>
+        <div class="brand-block panel-frame">
+          <p class="eyebrow">PARTI ORIGINAL · EXPEDITION CHANNEL</p>
+          <div class="brand-row">
+            <div>
+              <h1>DEEP DIVE</h1>
+              <p class="subtitle">Sunken Signal</p>
+            </div>
+            <div class="signal-core" aria-hidden="true"><span></span><span></span><span></span></div>
+          </div>
         </div>
-        <div class="dive-meter" aria-label="Dive progress">
-          <span id="dive-label">等待下潜</span>
-          <div class="meter-track"><div id="dive-progress" class="meter-fill"></div></div>
+
+        <div class="topbar-side">
+          <button id="rules-btn" class="rules-button panel-frame" type="button" aria-haspopup="dialog">玩法规则</button>
+          <div class="phase-chip panel-frame">
+            <span class="mini-label">MISSION STATUS</span>
+            <strong id="phase-pill">集结中</strong>
+            <small id="phase-kicker">集结潜水员</small>
+          </div>
+          <div class="dive-meter panel-frame" aria-label="Dive progress">
+            <div class="meter-copy"><span class="mini-label">DIVE SEQUENCE</span><strong id="dive-label">等待下潜</strong></div>
+            <div class="meter-track"><div id="dive-progress" class="meter-fill"></div></div>
+          </div>
         </div>
       </header>
 
       <main class="board">
-        <section class="sea-panel" aria-live="polite">
-          <div class="depth-lines" aria-hidden="true"></div>
-          <div class="card-zone">
-            <p id="phase-kicker" class="phase-kicker">集结潜水员</p>
+        <section class="sea-panel panel-frame" aria-live="polite">
+          <div class="sea-header">
+            <div><span class="mini-label">SALVAGE CHAMBER</span><h2>深海探测窗</h2></div>
+            <div class="risk-box"><span class="mini-label">RISK LEVEL</span><strong id="risk-indicator">低</strong></div>
+          </div>
+
+          <div class="sonar-stage">
+            <div class="sonar-rings" aria-hidden="true"></div>
+            <div class="sonar-sweep" aria-hidden="true"></div>
+            <div class="submersible-silhouette" aria-hidden="true"><span class="hull"></span><span class="window"></span><span class="tail"></span></div>
+            <div class="depth-marker" aria-hidden="true"><span>1200m</span><span>2400m</span><span>3600m</span><span>4800m</span></div>
             <article id="reveal-card" class="reveal-card card-empty">
               <span id="card-icon" class="card-icon">◌</span>
               <strong id="card-title">等待开始</strong>
@@ -32,52 +65,77 @@
             </article>
           </div>
 
-          <div class="path-stats">
-            <div class="stat-chip"><span>路径余宝</span><strong id="path-treasure">0</strong></div>
-            <div class="stat-chip"><span>遗物</span><strong id="path-relics">0</strong></div>
-            <div class="stat-chip"><span>仍在深潜</span><strong id="active-count">0</strong></div>
+          <div class="path-stats hud-row">
+            <div class="stat-chip"><span>路径余宝</span><strong id="path-treasure">0</strong><small>等待撤退者分配</small></div>
+            <div class="stat-chip"><span>遗物信号</span><strong id="path-relics">0</strong><small>单人撤退可回收</small></div>
+            <div class="stat-chip"><span>仍在深潜</span><strong id="active-count">0</strong><small>继续承担风险</small></div>
           </div>
 
-          <div id="hazards" class="hazard-row" aria-label="Current hazards"></div>
+          <div class="lower-grid">
+            <section class="hazard-panel panel-inset">
+              <div class="section-head"><span class="mini-label">THREAT ARRAY</span><strong>危险谱系</strong></div>
+              <div id="hazards" class="hazard-row" aria-label="Current hazards"></div>
+              <div id="removed-hazards" class="removed-hazards"></div>
+            </section>
+            <section class="log-panel panel-inset">
+              <div class="section-head"><span class="mini-label">MISSION FEED</span><strong>任务记录</strong></div>
+              <div id="event-log" class="event-log"><p>等待任务数据…</p></div>
+            </section>
+          </div>
         </section>
 
-        <aside class="crew-panel">
-          <div class="panel-title-row">
-            <h2>潜水队</h2>
-            <span id="lock-count" class="lock-count">0 / 0 已锁定</span>
-          </div>
-          <div id="players" class="player-list"></div>
+        <aside class="tactical-column">
+          <section class="crew-panel panel-frame">
+            <div class="panel-title-row"><div><span class="mini-label">CREW ROSTER</span><h2>潜水队</h2></div><span id="lock-count" class="lock-count">0 / 0 已锁定</span></div>
+            <div id="players" class="player-list"></div>
+          </section>
+
+          <section class="artifact-panel panel-frame">
+            <div class="panel-title-row"><div><span class="mini-label">RECOVERY TRACK</span><h2>遗物回收</h2></div><span class="lock-count">全局进度</span></div>
+            <div id="relic-track" class="relic-track" aria-label="Recovered relic track"></div>
+            <p class="artifact-note">前 3 件遗物每件 5 分，之后每件 10 分。只有恰好 1 名玩家撤退时才能带走路径遗物。</p>
+          </section>
         </aside>
       </main>
 
-      <section class="command-deck">
-        <div class="score-box">
-          <span>你的保险箱</span>
-          <strong id="my-score">0</strong>
-          <small id="my-unbanked">未入账 0</small>
-        </div>
-
+      <section class="command-deck panel-frame">
+        <div class="score-box"><span class="mini-label">YOUR VAULT</span><strong id="my-score">0</strong><small id="my-unbanked">未入账 0</small></div>
         <div id="decision-controls" class="decision-controls">
-          <button id="go-btn" class="choice-btn go" type="button">
-            <span class="choice-icon">↓</span>
-            <span><strong>继续深潜</strong><small>GO</small></span>
-          </button>
-          <button id="leave-btn" class="choice-btn leave" type="button">
-            <span class="choice-icon">↑</span>
-            <span><strong>返回母舰</strong><small>LEAVE</small></span>
-          </button>
-          <button id="lock-btn" class="lock-btn" type="button">锁定决定</button>
+          <button id="go-btn" class="choice-btn go" type="button"><span class="choice-icon">↓</span><span class="choice-copy"><strong>继续深潜</strong><small>追逐更深信号与更高收益</small></span></button>
+          <button id="leave-btn" class="choice-btn leave" type="button"><span class="choice-icon">↑</span><span class="choice-copy"><strong>返回母舰</strong><small>将未入账资源安全带回</small></span></button>
+          <button id="lock-btn" class="lock-btn" type="button"><span>确认航向</span><small>锁定后不可更改</small></button>
         </div>
-
         <div id="host-controls" class="host-controls">
-          <button id="start-btn" class="primary-btn" type="button">开始本局</button>
-          <button id="next-btn" class="primary-btn" type="button">开始下一次 Dive</button>
-          <button id="rematch-btn" class="primary-btn" type="button">再来一局</button>
+          <button id="start-btn" class="primary-btn" type="button">启动下潜</button>
+          <button id="next-btn" class="primary-btn" type="button">下一次 Dive</button>
+          <button id="rematch-btn" class="primary-btn" type="button">重新部署</button>
         </div>
-
         <p id="status-message" class="status-message">等待房间状态…</p>
       </section>
     </div>
+
+    <dialog id="rules-dialog" class="rules-dialog">
+      <div class="rules-shell">
+        <header class="rules-head"><div><span class="mini-label">MISSION MANUAL</span><h2>深海行动规则</h2></div><button id="rules-close" class="rules-close" type="button" aria-label="关闭规则">×</button></header>
+        <div class="rules-body">
+          <section class="rule-intro"><strong>目标</strong><p>完成 5 次 Dive 后，以已入账宝藏 + 遗物分数计算总分，最高者获胜；平手共享胜利。</p></section>
+          <div class="rule-grid">
+            <article><span class="rule-no">01</span><h3>揭牌探索</h3><p>每次从重新洗好的探索牌堆揭 1 张牌：宝藏、危险或遗物。</p></article>
+            <article><span class="rule-no">02</span><h3>宝藏分配</h3><p>宝藏数值由仍在深潜的玩家平均分配，不能整除的余数留在路径上。</p></article>
+            <article><span class="rule-no">03</span><h3>同步决定</h3><p>所有仍在深潜者同时选择 GO 或 LEAVE，再锁定。未全部锁定前，真实选择不会公开。</p></article>
+            <article><span class="rule-no">04</span><h3>撤退收益</h3><p>撤退者均分路径余宝；若恰好 1 人撤退，该玩家额外带走路径上全部遗物。</p></article>
+            <article><span class="rule-no danger">05</span><h3>危险崩溃</h3><p>同类危险第 2 次出现时立即 Crash：仍在深潜者本次未入账收益归零，路径资源丢失。</p></article>
+            <article><span class="rule-no">06</span><h3>危险移除</h3><p>触发 Crash 的第 2 张危险牌永久移出后续牌池，因此每次深潜的风险结构都会变化。</p></article>
+          </div>
+          <section class="rules-strip">
+            <div><span>遗物计分</span><strong>前 3 件 ×5</strong><strong>之后 ×10</strong></div>
+            <div><span>玩家人数</span><strong>3–8 人</strong></div>
+            <div><span>总轮次</span><strong>5 次 Dive</strong></div>
+          </section>
+          <section class="rule-tip"><strong>决策提示</strong><p>继续深潜能累积更高未入账收益，但任何重复危险都可能让本次收益清零；撤退可以锁定收益，也可能抢到路径遗物。</p></section>
+        </div>
+      </div>
+    </dialog>
 
     <script type="module" src="/src/ui/main.ts"></script>
   </body>
