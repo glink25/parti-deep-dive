@@ -4,6 +4,15 @@
   "id": "deep-dive-sunken-signal",
   "name": "Deep Dive: Sunken Signal",
   "version": "0.1.0",
+  "description": "3–8 人同步探索深海遗迹：继续潜航或及时撤退，带回宝藏与遗物，并躲过重复危险导致的崩塌。",
+  "tags": [
+    "push-your-luck",
+    "party",
+    "strategy"
+  ],
+  "author": {
+    "name": "glink25"
+  },
   "packageMode": "filesystem",
   "entry": {
     "ui": "index.html",
@@ -13,7 +22,9 @@
     "minPlayers": 3,
     "maxPlayers": 8
   },
-  "sync": { "mode": "snapshot" },
+  "sync": {
+    "mode": "snapshot"
+  },
   "permissions": {
     "network": false,
     "storage": "session"
