@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync, copyFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync, copyFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { createRequire } from 'node:module';
@@ -52,7 +52,7 @@ function offlineBuild() {
 
   copyFileSync(join(root, 'src', 'ui', 'style.css'), join(dist, 'assets', 'style.css'));
   copyFileSync(join(tmp, 'src', 'ui', 'main.js'), join(dist, 'assets', 'main.js'));
-  copyFileSync(join(root, 'public', 'parti.room.json'), join(dist, 'parti.room.json'));
+  cpSync(join(root, 'public'), dist, { recursive: true });
   let html = readFileSync(join(root, 'index.html'), 'utf8');
   html = html.replace('/src/ui/style.css', './assets/style.css').replace('/src/ui/main.ts', './assets/main.js');
   writeFileSync(join(dist, 'index.html'), html);
