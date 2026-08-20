@@ -1,0 +1,21 @@
+{
+  "partiVersion": "0.1.0",
+  "protocolVersion": 1,
+  "id": "deep-dive-sunken-signal",
+  "name": "Deep Dive: Sunken Signal",
+  "version": "0.1.0",
+  "packageMode": "filesystem",
+  "entry": {
+    "ui": "index.html",
+    "worker": "room.worker.js"
+  },
+  "room": {
+    "minPlayers": 3,
+    "maxPlayers": 8
+  },
+  "sync": { "mode": "snapshot" },
+  "permissions": {
+    "network": false,
+    "storage": "session"
+  }
+}
