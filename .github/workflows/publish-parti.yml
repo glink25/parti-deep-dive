@@ -1,0 +1,45 @@
+name: Publish Parti package
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'public/**'
+      - 'src/**'
+      - 'scripts/**'
+      - 'index.html'
+      - 'package.json'
+      - 'tsconfig.json'
+      - 'vite.config.ts'
+      - '.github/workflows/publish-parti.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm install
+      - name: Validate room
+        run: npm run validate
+      - name: Publish dist to parti-package
+        shell: bash
+        run: |
+          publish_dir="$(mktemp -d)"
+          cp -R dist/. "$publish_dir/"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan parti-package-publish
+          git rm -rf . >/dev/null 2>&1 || true
+          cp -R "$publish_dir/." .
+          git add -A
+          git commit -m "parti package ${GITHUB_SHA::7}"
+          git push -f origin HEAD:parti-package
