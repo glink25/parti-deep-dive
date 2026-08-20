@@ -43,8 +43,8 @@ function offlineBuild() {
     .replace(/^export\s+/gm, '');
   const workerPath = join(tmp, 'src', 'worker', 'index.js');
   let workerJs = readFileSync(workerPath, 'utf8');
-  workerJs = workerJs.replace(/import\s*\{[^;]*\}\s*from\s*['"]\.\.\/game\/core['"]\;?\s*/m, '');
-  const sdkImportMatch = workerJs.match(/import\s*\{[^;]+\}\s*from\s*['"]@parti\/worker-sdk['"]\;?/m);
+  workerJs = workerJs.replace(/import\s*\{[^;]*\}\s*from\s*['"]\.\.\/game\/core['"]?;?\s*/m, '');
+  const sdkImportMatch = workerJs.match(/import\s*\{[^;]+\}\s*from\s*['"]@parti\/worker-sdk['"]?;?/m);
   if (!sdkImportMatch) throw new Error('worker SDK import missing after transpile');
   workerJs = workerJs.replace(sdkImportMatch[0], '');
   const finalWorker = `${sdkImportMatch[0]}\n${coreJs}\n${workerJs}`;
