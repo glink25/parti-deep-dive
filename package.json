@@ -1,0 +1,19 @@
+{
+  "name": "parti-deep-dive",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "node scripts/test.mjs",
+    "validate": "node scripts/validate.mjs",
+    "package": "npm run build && cd dist && zip -qrFS ../parti.room.zip ."
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "typescript": "^5.9.0",
+    "vite": "^7.0.0"
+  }
+}
