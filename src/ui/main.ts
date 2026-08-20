@@ -1,4 +1,4 @@
-import type { Decision, GameState, HazardType, ExploreCard } from '../game/core';
+import type { Decision, GameState, HazardType, ExploreCard, PublicEvent } from '../game/core';
 
 const $ = <T extends HTMLElement>(id: string): T => {
   const element = document.getElementById(id);
@@ -9,6 +9,8 @@ const $ = <T extends HTMLElement>(id: string): T => {
 const diveLabel = $('dive-label');
 const diveProgress = $('dive-progress');
 const phaseKicker = $('phase-kicker');
+const phasePill = $('phase-pill');
+const riskIndicator = $('risk-indicator');
 const revealCard = $('reveal-card');
 const cardIcon = $('card-icon');
 const cardTitle = $('card-title');
@@ -17,6 +19,10 @@ const pathTreasure = $('path-treasure');
 const pathRelics = $('path-relics');
 const activeCount = $('active-count');
 const hazards = $('hazards');
+const removedHazards = $('removed-hazards');
+const eventLog = $('event-log');
+const relicTrack = $('relic-track');
+const bubbleField = $('bubble-field');
 const players = $('players');
 const lockCount = $('lock-count');
 const myScore = $('my-score');
@@ -30,6 +36,9 @@ const lockBtn = $<HTMLButtonElement>('lock-btn');
 const startBtn = $<HTMLButtonElement>('start-btn');
 const nextBtn = $<HTMLButtonElement>('next-btn');
 const rematchBtn = $<HTMLButtonElement>('rematch-btn');
+const rulesBtn = $<HTMLButtonElement>('rules-btn');
+const rulesClose = $<HTMLButtonElement>('rules-close');
+const rulesDialog = $<HTMLDialogElement>('rules-dialog');
 
 let state: GameState | null = null;
 let selectedDecision: Decision | null = null;
@@ -44,24 +53,64 @@ const hazardLabels: Record<HazardType, string> = {
   PREDATOR: '猎影',
 };
 
+const eventLabels: Record<PublicEvent['type'], string> = {
+  seed: '任务种子已记录',
+  shuffle: '探索牌堆已重新洗牌',
+  draw: '探测器发现新信号',
+  treasure: '深海晶矿完成分配',
+  hazard: '危险信号已记录',
+  relic: '发现失落信标',
+  decisions: '全员决定已揭示',
+  leave: '撤退队伍返回母舰',
+  crash: '重复危险触发崩溃',
+  diveEnd: '本次 Dive 结束',
+  gameEnd: '远征结算完成',
+  system: '系统记录',
+};
+
+function createBubbles(): void {
+  const fragment = document.createDocumentFragment();
+  for (let i = 0; i < 24; i += 1) {
+    const bubble = document.createElement('span');
+    bubble.className = 'bubble';
+    const size = 3 + ((i * 7) % 12);
+    bubble.style.width = `${size}px`;
+    bubble.style.height = `${size}px`;
+    bubble.style.left = `${(i * 37) % 100}%`;
+    bubble.style.opacity = String(0.16 + ((i * 11) % 30) / 100);
+    bubble.style.animationDuration = `${8 + ((i * 13) % 12)}s`;
+    bubble.style.animationDelay = `${-((i * 17) % 16)}s`;
+    bubble.style.setProperty('--drift', `${-22 + ((i * 19) % 45)}px`);
+    fragment.append(bubble);
+  }
+  bubbleField.replaceChildren(fragment);
+}
+
 function cardPresentation(card: ExploreCard | null): { icon: string; title: string; detail: string; className: string } {
   if (!card) return { icon: '◌', title: '等待开始', detail: '房主将在 3–8 人到齐后启动本局', className: 'card-empty' };
-  if (card.kind === 'treasure') return { icon: '◇', title: `深海晶矿 ${card.value}`, detail: '晶矿会立即按仍在深潜的人数均分', className: 'card-treasure' };
-  if (card.kind === 'relic') return { icon: '✦', title: '失落信标', detail: '只有恰好一人撤退时才能带走路径遗物', className: 'card-relic' };
+  if (card.kind === 'treasure') return { icon: '◇', title: `深海晶矿 ${card.value}`, detail: '晶矿立即按仍在深潜的人数均分，余数留在路径', className: 'card-treasure' };
+  if (card.kind === 'relic') return { icon: '✦', title: '失落信标', detail: '信标进入路径；只有恰好一人撤退时才能回收', className: 'card-relic' };
   const count = state?.revealedHazards[card.hazard] ?? 0;
   return {
     icon: count >= 2 ? '⚠' : '△',
     title: `${hazardLabels[card.hazard]} ${count}/2`,
-    detail: count >= 2 ? '同类危险再次出现：本次 Dive 立即崩溃' : '同类危险再出现一次就会崩溃',
+    detail: count >= 2 ? '同类危险第二次出现：立即 Crash，本次未入账收益归零' : '危险已标记；同类信号再次出现就会崩溃',
     className: count >= 2 ? 'card-crash' : 'card-hazard',
   };
 }
 
 function phaseText(current: GameState): string {
   if (current.phase === 'lobby') return '等待队伍集结';
-  if (current.phase === 'diveEnd') return current.lastDiveEndReason === 'crash' ? 'Dive 崩溃 · 返回母舰' : 'Dive 完成 · 返回母舰';
+  if (current.phase === 'diveEnd') return current.lastDiveEndReason === 'crash' ? '崩溃后返回母舰' : '本次下潜完成';
   if (current.phase === 'gameEnd') return '五次 Dive 已完成';
-  return '做出决定，然后锁定';
+  return '选择航向并锁定';
+}
+
+function phaseName(current: GameState): string {
+  if (current.phase === 'lobby') return '集结中';
+  if (current.phase === 'decision') return '同步决策';
+  if (current.phase === 'diveEnd') return current.lastDiveEndReason === 'crash' ? '紧急返航' : '整备中';
+  return '远征结束';
 }
 
 function updateCard(current: GameState): void {
@@ -79,6 +128,7 @@ function updateCard(current: GameState): void {
 }
 
 function updateHazards(current: GameState): void {
+  let activeThreats = 0;
   for (const type of Object.keys(hazardLabels) as HazardType[]) {
     let chip = hazards.querySelector<HTMLElement>(`[data-hazard="${type}"]`);
     if (!chip) {
@@ -88,9 +138,16 @@ function updateHazards(current: GameState): void {
       hazards.append(chip);
     }
     const count = current.revealedHazards[type];
+    activeThreats += count;
     chip.textContent = `${hazardLabels[type]} ${count}/2`;
     chip.classList.toggle('danger', count >= 1);
   }
+  riskIndicator.textContent = activeThreats === 0 ? '低' : activeThreats <= 2 ? '警戒' : '高危';
+  riskIndicator.style.color = activeThreats === 0 ? '#9be9d6' : activeThreats <= 2 ? '#f7c96c' : '#ff8290';
+
+  removedHazards.textContent = current.removedHazards.length
+    ? `永久移除：${current.removedHazards.map((id) => hazardLabels[id.split('-')[1] as HazardType] ?? id).join(' · ')}`
+    : '尚无危险牌被永久移除';
 }
 
 function updatePlayers(current: GameState): void {
@@ -114,8 +171,8 @@ function updatePlayers(current: GameState): void {
     row.querySelector('small')!.textContent = !player.connected
       ? '断线 · 等待重连'
       : current.phase === 'decision' && active
-        ? decision?.locked ? '决定已锁定' : decision?.chosen ? '已选择 · 待锁定' : '正在决定…'
-        : active ? '深潜中' : '已返回母舰';
+        ? decision?.locked ? '航向已锁定' : decision?.chosen ? '已选择 · 待确认' : '正在决定…'
+        : active ? `深潜中 · 未入账 ${player.unbanked}` : '已返回母舰';
     row.querySelector('.player-score')!.textContent = String(player.banked + player.relicPoints);
   }
   for (const row of [...players.querySelectorAll<HTMLElement>('[data-player-id]')]) {
@@ -123,16 +180,52 @@ function updatePlayers(current: GameState): void {
   }
 }
 
+function updateRelicTrack(current: GameState): void {
+  const fragment = document.createDocumentFragment();
+  for (let i = 0; i < 5; i += 1) {
+    const node = document.createElement('span');
+    node.className = `relic-node${i < current.recoveredRelicCount ? ' recovered' : ''}`;
+    node.textContent = i < current.recoveredRelicCount ? '✦' : i < 3 ? '5' : '10';
+    node.title = i < 3 ? '价值 5 分' : '价值 10 分';
+    fragment.append(node);
+  }
+  relicTrack.replaceChildren(fragment);
+}
+
+function formatEvent(event: PublicEvent, current: GameState): string {
+  if (event.type === 'treasure') return `晶矿 ${event.value}：每人 +${event.each}，路径留下 ${event.remainder}`;
+  if (event.type === 'hazard') return `${hazardLabels[event.hazard]} ${event.count}/2${event.crash ? ' · CRASH' : ''}`;
+  if (event.type === 'relic') return '失落信标进入路径';
+  if (event.type === 'decisions') {
+    const summary = Object.entries(event.choices).map(([id, choice]) => `${current.players[id]?.name ?? id}:${choice}`).join(' · ');
+    return `航向揭示 · ${summary}`;
+  }
+  if (event.type === 'leave') return `${event.playerIds.length} 人返航 · 路径分成 ${event.pathShare}${event.relicCount ? ` · 回收遗物 ${event.relicCount}` : ''}`;
+  if (event.type === 'crash') return `${hazardLabels[event.hazard]} 重复 · 下潜崩溃`;
+  if (event.type === 'diveEnd') return `Dive ${event.diveIndex + 1} 结束 · ${event.reason}`;
+  if (event.type === 'gameEnd') return `远征结束 · 最高分 ${event.highScore}`;
+  if (event.type === 'system') return event.message;
+  return eventLabels[event.type];
+}
+
+function updateEventLog(current: GameState): void {
+  const visible = current.events.filter((event) => !['seed', 'shuffle', 'draw'].includes(event.type)).slice(-4).reverse();
+  if (!visible.length) {
+    eventLog.innerHTML = '<p>声呐频道静默，等待首个信号…</p>';
+    return;
+  }
+  eventLog.replaceChildren(...visible.map((event) => {
+    const line = document.createElement('p');
+    line.textContent = formatEvent(event, current);
+    return line;
+  }));
+}
+
 function updateControls(current: GameState): void {
   const meId = window.parti.playerId;
   const me = meId ? current.players[meId] : undefined;
   const myDecision = meId ? current.decisions[meId] : undefined;
   const isActive = Boolean(meId && current.activeDivers.includes(meId));
-  const isHost = Boolean(meId && current.players[meId] && current.participantIds.length >= 0 && current.phase !== 'lobby'
-    ? false
-    : false);
-  // Runtime does not expose host id in the room state; host-only actions are still enforced by Worker.
-  // In lobby/intermission we show orchestration buttons to all; non-host clicks get a clear server error.
   const canChoose = current.phase === 'decision' && isActive && !myDecision?.locked;
   decisionControls.classList.toggle('hidden', current.phase !== 'decision' || !isActive);
   goBtn.disabled = !canChoose;
@@ -140,18 +233,17 @@ function updateControls(current: GameState): void {
   lockBtn.disabled = !canChoose || !myDecision?.chosen;
   goBtn.classList.toggle('selected', selectedDecision === 'GO');
   leaveBtn.classList.toggle('selected', selectedDecision === 'LEAVE');
-  lockBtn.textContent = myDecision?.locked ? '决定已锁定' : '锁定决定';
+  const lockSpan = lockBtn.querySelector('span');
+  if (lockSpan) lockSpan.textContent = myDecision?.locked ? '航向已锁定' : '确认航向';
 
   hostControls.classList.toggle('hidden', !['lobby', 'diveEnd', 'gameEnd'].includes(current.phase));
   startBtn.classList.toggle('hidden', current.phase !== 'lobby');
   nextBtn.classList.toggle('hidden', current.phase !== 'diveEnd');
   rematchBtn.classList.toggle('hidden', current.phase !== 'gameEnd');
   startBtn.disabled = Object.values(current.players).filter((p) => p.connected).length < 3;
-  void isHost;
 
   myScore.textContent = String(me ? me.banked + me.relicPoints : 0);
   myUnbanked.textContent = `未入账 ${me?.unbanked ?? 0}${me?.relicPoints ? ` · 遗物分 ${me.relicPoints}` : ''}`;
-
   if (myDecision?.locked) selectedDecision = null;
 }
 
@@ -164,16 +256,16 @@ function updateStatus(current: GameState): void {
   statusMessage.classList.remove('error');
   if (current.phase === 'lobby') {
     const ready = Object.values(current.players).filter((p) => p.connected).length;
-    statusMessage.textContent = `${ready}/3 最少人数 · 房主可开始`;
+    statusMessage.textContent = `${ready}/3 最少人数 · 房主可启动远征`;
   } else if (current.phase === 'decision') {
     const meId = window.parti.playerId;
     const mine = meId ? current.decisions[meId] : undefined;
-    statusMessage.textContent = mine?.locked ? '已锁定。等待其他潜水员。' : mine?.chosen ? '选择已保存，可修改；锁定后不可更改。' : '继续深潜，或带着未入账晶矿返回母舰。';
+    statusMessage.textContent = mine?.locked ? '航向已锁定，等待其他潜水员。' : mine?.chosen ? '航向已暂存，可修改；确认后不可更改。' : '评估风险：继续深潜，或带着未入账晶矿返航。';
   } else if (current.phase === 'diveEnd') {
-    statusMessage.textContent = current.lastDiveEndReason === 'crash' ? '本次 Dive 崩溃。仍在深潜者失去未入账晶矿。' : '本次 Dive 结束。准备下一次下潜。';
+    statusMessage.textContent = current.lastDiveEndReason === 'crash' ? '本次下潜崩溃。仍在深潜者失去全部未入账收益。' : '本次 Dive 已完成，母舰正在准备下一次投放。';
   } else {
     const names = current.winners.map((id) => current.players[id]?.name ?? id).join('、');
-    statusMessage.textContent = `胜者：${names || '—'}${current.winners.length > 1 ? '（共享胜利）' : ''}`;
+    statusMessage.textContent = `远征胜者：${names || '—'}${current.winners.length > 1 ? ' · 共享胜利' : ''}`;
   }
 }
 
@@ -181,6 +273,7 @@ function render(current: GameState): void {
   state = current;
   diveLabel.textContent = current.diveIndex >= 0 ? `DIVE ${current.diveIndex + 1} / 5` : '等待下潜';
   diveProgress.style.width = `${Math.max(0, ((current.diveIndex + 1) / 5) * 100)}%`;
+  phasePill.textContent = phaseName(current);
   phaseKicker.textContent = phaseText(current);
   pathTreasure.textContent = String(current.pathTreasure);
   pathRelics.textContent = String(current.pathRelics.length);
@@ -190,6 +283,8 @@ function render(current: GameState): void {
   updateCard(current);
   updateHazards(current);
   updatePlayers(current);
+  updateRelicTrack(current);
+  updateEventLog(current);
   updateControls(current);
   updateStatus(current);
 }
@@ -208,6 +303,9 @@ lockBtn.addEventListener('click', () => void window.parti.action('lockDecision')
 startBtn.addEventListener('click', () => void window.parti.action('startGame'));
 nextBtn.addEventListener('click', () => void window.parti.action('beginNextDive'));
 rematchBtn.addEventListener('click', () => void window.parti.action('rematch'));
+rulesBtn.addEventListener('click', () => rulesDialog.showModal());
+rulesClose.addEventListener('click', () => rulesDialog.close());
+rulesDialog.addEventListener('click', (event) => { if (event.target === rulesDialog) rulesDialog.close(); });
 
 window.parti.onEvent<{ choice: Decision }>('decisionSelected', ({ choice }) => {
   selectedDecision = choice;
@@ -242,4 +340,6 @@ window.parti.exposeToAgent((raw) => {
       : [],
   };
 });
+
+createBubbles();
 window.parti.ready();
