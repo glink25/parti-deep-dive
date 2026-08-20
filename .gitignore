@@ -1,0 +1,6 @@
+node_modules/
+dist/
+.offline-build/
+.test-build/
+parti.room.zip
+.DS_Store
