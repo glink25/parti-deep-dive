@@ -38,6 +38,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout --orphan parti-package-publish
           git rm -rf . >/dev/null 2>&1 || true
+          git clean -fdx >/dev/null 2>&1 || true
           cp -R "$publish_dir/." .
           git add -A
           git commit -m "parti package ${GITHUB_SHA::7}"
