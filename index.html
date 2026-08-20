@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#071821" />
+    <title>Deep Dive: Sunken Signal</title>
+    <link rel="stylesheet" href="/src/ui/style.css" />
+  </head>
+  <body>
+    <div id="app" class="game-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">PARTI ORIGINAL</p>
+          <h1>DEEP DIVE</h1>
+        </div>
+        <div class="dive-meter" aria-label="Dive progress">
+          <span id="dive-label">等待下潜</span>
+          <div class="meter-track"><div id="dive-progress" class="meter-fill"></div></div>
+        </div>
+      </header>
+
+      <main class="board">
+        <section class="sea-panel" aria-live="polite">
+          <div class="depth-lines" aria-hidden="true"></div>
+          <div class="card-zone">
+            <p id="phase-kicker" class="phase-kicker">集结潜水员</p>
+            <article id="reveal-card" class="reveal-card card-empty">
+              <span id="card-icon" class="card-icon">◌</span>
+              <strong id="card-title">等待开始</strong>
+              <span id="card-detail">房主将在 3–8 人到齐后启动本局</span>
+            </article>
+          </div>
+
+          <div class="path-stats">
+            <div class="stat-chip"><span>路径余宝</span><strong id="path-treasure">0</strong></div>
+            <div class="stat-chip"><span>遗物</span><strong id="path-relics">0</strong></div>
+            <div class="stat-chip"><span>仍在深潜</span><strong id="active-count">0</strong></div>
+          </div>
+
+          <div id="hazards" class="hazard-row" aria-label="Current hazards"></div>
+        </section>
+
+        <aside class="crew-panel">
+          <div class="panel-title-row">
+            <h2>潜水队</h2>
+            <span id="lock-count" class="lock-count">0 / 0 已锁定</span>
+          </div>
+          <div id="players" class="player-list"></div>
+        </aside>
+      </main>
+
+      <section class="command-deck">
+        <div class="score-box">
+          <span>你的保险箱</span>
+          <strong id="my-score">0</strong>
+          <small id="my-unbanked">未入账 0</small>
+        </div>
+
+        <div id="decision-controls" class="decision-controls">
+          <button id="go-btn" class="choice-btn go" type="button">
+            <span class="choice-icon">↓</span>
+            <span><strong>继续深潜</strong><small>GO</small></span>
+          </button>
+          <button id="leave-btn" class="choice-btn leave" type="button">
+            <span class="choice-icon">↑</span>
+            <span><strong>返回母舰</strong><small>LEAVE</small></span>
+          </button>
+          <button id="lock-btn" class="lock-btn" type="button">锁定决定</button>
+        </div>
+
+        <div id="host-controls" class="host-controls">
+          <button id="start-btn" class="primary-btn" type="button">开始本局</button>
+          <button id="next-btn" class="primary-btn" type="button">开始下一次 Dive</button>
+          <button id="rematch-btn" class="primary-btn" type="button">再来一局</button>
+        </div>
+
+        <p id="status-message" class="status-message">等待房间状态…</p>
+      </section>
+    </div>
+
+    <script type="module" src="/src/ui/main.ts"></script>
+  </body>
+</html>
